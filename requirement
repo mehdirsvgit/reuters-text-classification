@@ -1,0 +1,10 @@
+BeautifulSoup4
+gensim
+tensorflow
+nltk
+pandas
+pandas
+sklearn
+tabulate
+numpy==1.14.5
+scipy
