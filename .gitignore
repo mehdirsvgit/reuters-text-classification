@@ -1,0 +1,8 @@
+.bundle/
+.DS_*
+.bundle/*
+.idea/*
+.ipynb_checkpoints/*
+__pycache__/*
+
+venv/*
