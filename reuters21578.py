@@ -5,12 +5,11 @@ from bs4 import BeautifulSoup
 
 from pandas import DataFrame
 
-import warnings
-
 from tfidf_classifier import TFIDFClassifier
 
 import numpy as np
 
+import warnings
 warnings.filterwarnings('ignore')
 
 

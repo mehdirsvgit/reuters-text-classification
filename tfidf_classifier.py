@@ -25,15 +25,31 @@ class TFIDFClassifier():
         self._tfidf_transformer = tfidf
 
     def to_tfidf(self, text):
+        """
+        convers list of articles text to TFIDF
+        :param text: List of articles text
+        :return: document matrix of TFIDF
+        """
         return self._tfidf_transformer.transform(text)
 
     def train(self, data, labels):
+        """
+        trains classifier on given data and labels
+        :param data: document matrix of TFIDF
+        :param labels: corresponding correct labels
+        """
         self._clf.fit(data, labels)
 
     def predict(self, data):
         return self._clf.predict(data)
 
     def get_precision_recall(self, data, labels):
+        """
+        return tuple of precision, recall on given data and labels
+        :param data: document matrix of TFIDF
+        :param labels: corresponding correct labels
+        :return: tuple (precision, recall)
+        """
         predicted_y = self._clf.predict(data)
         tn, fp, fn, tp = confusion_matrix(labels, predicted_y).ravel()
         precision_score = tp / (tp + fp)
