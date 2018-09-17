@@ -10,6 +10,7 @@ from tfidf_classifier import TFIDFClassifier
 import numpy as np
 
 import warnings
+
 warnings.filterwarnings('ignore')
 
 
@@ -34,20 +35,20 @@ class Reuters():
 
         self._article_stats = DataFrame(data=topics_stats, columns=['Topic', 'Set', 'Count'])
 
-    def _remove_tags(self, text):
+    def _remove_tags(self, text: str):
         return re.sub('<[^<]+?>', '', text).strip()
 
-    def _update_stats_field(self, articles_stats, topic, set_class):
-        idx = articles_stats[articles_stats.Topic == topic][articles_stats.Set == set_class].index[0]
-        f = articles_stats.get_value(idx, 'Count')
-        articles_stats.set_value(idx, 'Count', f + 1)
+    def _update_stats_field(self, topic: str, set_class:str):
+        idx = self._article_stats[self._article_stats.Topic == topic][self._article_stats.Set == set_class].index[0]
+        f = self._article_stats.get_value(idx, 'Count')
+        self._article_stats.set_value(idx, 'Count', f + 1)
 
-    def _update_stats(self, articles_stats, topic, set_class):
-        self._update_stats_field(articles_stats, topic, set_class)
+    def _update_stats(self, topic: str, set_class: str):
+        self._update_stats_field(topic, set_class)
         if set_class in ['TEST', 'TRAIN']:
-            self._update_stats_field(articles_stats, topic, 'USABLE')
+            self._update_stats_field(topic, 'USABLE')
 
-    def _unescape(self, text):
+    def _unescape(self, text: str):
         return saxutils.unescape(text)
 
     def _newslines(self):
@@ -60,20 +61,25 @@ class Reuters():
                 for newsline in content('reuters'):
                     yield newsline
 
-    def _matrix_to_list(self, data):
+    def _matrix_to_list(self, data:list):
         return [np.squeeze(np.asarray(item.todense())) for item in data]
 
-    def get_news_stats(self) -> DataFrame:
+    def get_news_stats(self, mode='offline') -> DataFrame:
         """
+        :param mode: if offline, loads stats from disk
         returns stats of number of available news for each set
         :return datafram of stats with ['Topic', 'Set', 'Count'] as Columns
         """
+        if mode == 'offline':
+            self._article_stats = DataFrame.from_csv('news_stats.csv', sep='\t')
+            return self._article_stats
+
         for newsline in self._newslines():
             set_class = newsline.attrs['lewissplit'].upper()
             topics = newsline.topics.contents
             for topic in topics:
                 topic_cleaned = self._remove_tags(str(topic)).strip()
-                self._update_stats(articles_stats=self._article_stats, topic=topic_cleaned, set_class=set_class)
+                self._update_stats(topic=topic_cleaned, set_class=set_class)
 
         return self._article_stats
 
@@ -106,13 +112,12 @@ class Reuters():
                     'TFIDF': []
                 }, ignore_index=True)
 
-    def get_all_train(self, set: str):
+    def get_all_train(self):
         """
         Returen all TRAIN data to calculate TFIDF
-        :param set:
         :return:
         """
-        return self._data[self._data.Set == set].Body.values.tolist()
+        return self._data[self._data.Set == 'TRAIN'].Body.values.tolist()
 
     def add_tfidf(self, tfidf_classifier: TFIDFClassifier):
         """

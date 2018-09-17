@@ -24,7 +24,7 @@ class TFIDFClassifier():
         tfidf.fit(train_data)
         self._tfidf_transformer = tfidf
 
-    def to_tfidf(self, text):
+    def to_tfidf(self, text: list):
         """
         convers list of articles text to TFIDF
         :param text: List of articles text
@@ -32,7 +32,7 @@ class TFIDFClassifier():
         """
         return self._tfidf_transformer.transform(text)
 
-    def train(self, data, labels):
+    def train(self, data: list, labels: list):
         """
         trains classifier on given data and labels
         :param data: document matrix of TFIDF
@@ -40,10 +40,10 @@ class TFIDFClassifier():
         """
         self._clf.fit(data, labels)
 
-    def predict(self, data):
+    def predict(self, data: list)->list:
         return self._clf.predict(data)
 
-    def get_precision_recall(self, data, labels):
+    def get_precision_recall(self, data: list, labels: list):
         """
         return tuple of precision, recall on given data and labels
         :param data: document matrix of TFIDF
