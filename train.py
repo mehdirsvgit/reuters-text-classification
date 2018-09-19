@@ -28,7 +28,7 @@ tf.flags.DEFINE_float("l2_reg_lambda", 0.0, "L2 regularization lambda (default: 
 
 # Training parameters
 tf.flags.DEFINE_integer("batch_size", 64, "Batch Size (default: 64)")
-tf.flags.DEFINE_integer("num_epochs", 20, "Number of training epochs (default: 200)")
+tf.flags.DEFINE_integer("num_epochs", 10, "Number of training epochs (default: 200)")
 tf.flags.DEFINE_integer("evaluate_every", 100, "Evaluate model on dev set after this many steps (default: 100)")
 tf.flags.DEFINE_integer("checkpoint_every", 100, "Save model after this many steps (default: 100)")
 tf.flags.DEFINE_integer("num_checkpoints", 5, "Number of checkpoints to store (default: 5)")
@@ -139,6 +139,7 @@ def train(x_train, y_train, vocab_processor, x_dev, y_dev, x_test, y_test, topic
 
             # Initialize all variables
             sess.run(tf.global_variables_initializer())
+            sess.run(tf.local_variables_initializer())
 
             # load embedding vectors from the glove
             print("Load glove file {}".format(cfg['word_embeddings']['glove']['path']))
@@ -174,11 +175,11 @@ def train(x_train, y_train, vocab_processor, x_dev, y_dev, x_test, y_test, topic
                     cnn.input_y: y_batch,
                     cnn.dropout_keep_prob: 1.0
                 }
-                step, summaries, loss, accuracy = sess.run(
-                    [global_step, dev_summary_op, cnn.loss, cnn.accuracy],
+                step, summaries, loss, accuracy, pre, rec = sess.run(
+                    [global_step, dev_summary_op, cnn.loss, cnn.accuracy, cnn.pre_op, cnn.rec_op],
                     feed_dict)
                 time_str = datetime.datetime.now().isoformat()
-                print("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
+                print("{}: step {}, loss {:g}, acc {:g}, pre {:g}, rec{:g}".format(time_str, step, loss, accuracy, pre, rec))
                 if writer:
                     writer.add_summary(summaries, step)
 
