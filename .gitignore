@@ -4,5 +4,9 @@
 .idea/*
 .ipynb_checkpoints/*
 __pycache__/*
+runs/*
+venv/*
+venv3/*
+
 embeddings/glov*
 
