@@ -38,7 +38,7 @@ class Reuters():
     def _remove_tags(self, text: str):
         return re.sub('<[^<]+?>', '', text).strip()
 
-    def _update_stats_field(self, topic: str, set_class:str):
+    def _update_stats_field(self, topic: str, set_class: str):
         idx = self._article_stats[self._article_stats.Topic == topic][self._article_stats.Set == set_class].index[0]
         f = self._article_stats.get_value(idx, 'Count')
         self._article_stats.set_value(idx, 'Count', f + 1)
@@ -52,7 +52,7 @@ class Reuters():
         return saxutils.unescape(text)
 
     def _newslines(self):
-        # for i in range(1):
+        # for i in [1]:
         for i in range(self._number_of_files):
             file_id = '00' + str(i) if i < 10 else '0' + str(i)
             print("processing file {}".format(file_id))
@@ -61,7 +61,7 @@ class Reuters():
                 for newsline in content('reuters'):
                     yield newsline
 
-    def _matrix_to_list(self, data:list):
+    def _matrix_to_list(self, data: list):
         return [np.squeeze(np.asarray(item.todense())) for item in data]
 
     def get_news_stats(self, mode='offline') -> DataFrame:
@@ -83,11 +83,17 @@ class Reuters():
 
         return self._article_stats
 
-    def load_data(self):
+    def load_data(self, path=''):
         """
         Loads all the data from txt files to dataframe
         :return:
         """
+        if path != '':
+            print('Loading data from articles.csv ...')
+            self._data = DataFrame.from_csv('articles.csv', sep='\t')
+            return
+
+        print('Loading data from articles.csv ...')
         for newsline in self._newslines():
             document_id = newsline['newid']
 
@@ -108,9 +114,11 @@ class Reuters():
                     'Id': document_id,
                     'Topic': topic_cleaned,
                     'Set': set_class,
-                    'Body': document_body,
+                    'Body': self._clean_body(document_body),
                     'TFIDF': []
                 }, ignore_index=True)
+        # self._data.to_csv('articles.csv', sep='\t')
+
 
     def get_all_train(self):
         """
@@ -143,3 +151,28 @@ class Reuters():
         labels = [0] * (len(positive_examples) + len(negative_examples))
         labels[0:len(positive_examples)] = [1] * len(positive_examples)
         return all_examples, labels
+
+    def _clean_body(self, text):
+        text = re.sub(r"\n+", " ", text)
+        text = re.sub(r"\t+", " ", text)
+        return re.sub(r"\s+", " ", text)
+
+    def get_text(self, topic: str, set: str):
+        """
+        getting vectorized TFIDF equivalent of news with belonging to specific topic and set
+        :param topic: news topic. e.g. acq
+        :param set: TRAIN or TEST
+        :return: list of TFIDF in csr_matrix form
+        """
+        positive_examples = self._data[self._data.Topic == topic][self._data.Set == set].Body.values.tolist()
+        negative_examples = self._data[self._data.Topic != topic][self._data.Set == set].Body.values.tolist()
+        return positive_examples, negative_examples
+        # all_examples = positive_examples + negative_examples
+        #
+        # labels = [0] * (len(positive_examples) + len(negative_examples))
+        # labels[0:len(positive_examples)] = [1] * len(positive_examples)
+        # return all_examples, labels
+
+
+    def data(self):
+        return self._data

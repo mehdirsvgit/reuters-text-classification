@@ -1,6 +1,6 @@
 BeautifulSoup4
 gensim
-tensorflow
+tensorflow==1.9
 nltk
 pandas
 pandas
@@ -8,3 +8,4 @@ sklearn
 tabulate
 numpy==1.14.5
 scipy
+pyyaml

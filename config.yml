@@ -1,0 +1,13 @@
+word_embeddings:
+  # types of word embedding algorithm
+  # setting default to empty string disables the word embeddings
+  default: glove_big
+  glove_big:
+    path: ./embeddings/glove.42B.300d.txt
+    dimension: 300
+    length: 1917494
+
+  glove:
+    path: ./embeddings/glove.6B.200d.txt
+    dimension: 200
+    length: 1917494
